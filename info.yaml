@@ -45,10 +45,10 @@ pinout:
   uo[7]: "HSync"
 
   # Bidirectional pins
-  uio[0]: ""
-  uio[1]: ""
-  uio[2]: ""
-  uio[3]: ""
+  uio[0]: "Game_Track[0]"
+  uio[1]: "Game_Track[1]"
+  uio[2]: "Game_Speed[0]"
+  uio[3]: "Game_Speed[1]"
   uio[4]: ""
   uio[5]: ""
   uio[6]: ""
