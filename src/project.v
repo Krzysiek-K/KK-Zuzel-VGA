@@ -115,19 +115,14 @@ module tt_um_KK_VGA01(
   wire armwin = pix_y[8] & pix_x[8] & pix_x[7] & ~pix_x[6];
   wire[3:0] moto_spr = {sp4on,sp3on,sp2on,sp1on};
   wire[3:0] armsig = {4{armwin}} & moto_spr;
-  wire[3:0] leadsig = {4{goalmsk}} & moto_arm & moto_spr;
-  wire setlead = leadsig[0] | leadsig[1] | leadsig[2] | leadsig[3];
-  wire[2:0] lead_rgb_next = {leadsig[0] | leadsig[3], leadsig[1] | leadsig[2] | leadsig[3], leadsig[2]};
+  wire[3:0] arm_spr = moto_arm & moto_spr;
+  wire setlead = goalmsk & (arm_spr[0] | arm_spr[1] | arm_spr[2] | arm_spr[3]);
+  wire[2:0] lead_rgb_next = {arm_spr[0] | arm_spr[3], arm_spr[1] | arm_spr[2] | arm_spr[3], arm_spr[2]};
+  wire keep_finish = ~(mt_ctrl[0] | setlead);
+  wire load_lead = ~mt_ctrl[0] & setlead;
   always @(posedge clk) begin
-    if (mt_ctrl[0]) begin
-      moto_arm <= 4'b0000;
-      lead_rgb <= 3'b000;
-    end else if (setlead) begin
-      moto_arm <= 4'b0000;
-      lead_rgb <= lead_rgb_next;
-    end else begin
-      moto_arm <= moto_arm | armsig;
-    end
+    moto_arm <= (moto_arm | armsig) & {4{keep_finish}};
+    lead_rgb <= (lead_rgb & {3{keep_finish}}) | (lead_rgb_next & {3{load_lead}});
   end
 
   wire mR = sp1on | sp4on;
