@@ -111,27 +111,30 @@ module tt_um_KK_VGA01(
   wire goal = goalmsk & mt_ctrl[14];
 
   reg[3:0] moto_arm;
-  reg[2:0] lead_rgb;
+  reg[3:0] moto_lead;
   wire armwin = pix_y[8] & pix_x[8] & pix_x[7] & ~pix_x[6];
   wire[3:0] moto_spr = {sp4on,sp3on,sp2on,sp1on};
   wire[3:0] armsig = {4{armwin}} & moto_spr;
-  wire[3:0] arm_spr = moto_arm & moto_spr;
-  wire setlead = goalmsk & (arm_spr[0] | arm_spr[1] | arm_spr[2] | arm_spr[3]);
-  wire[2:0] lead_rgb_next = {arm_spr[0] | arm_spr[3], arm_spr[1] | arm_spr[2] | arm_spr[3], arm_spr[2]};
-  wire keep_finish = ~(mt_ctrl[0] | setlead);
-  wire load_lead = ~mt_ctrl[0] & setlead;
+  wire nr = ~mt_ctrl[0];
+  wire[3:0] leadsig = {4{goalmsk & nr}} & moto_arm & moto_spr;
+  wire setlead = leadsig[0] | leadsig[1] | leadsig[2] | leadsig[3];
+  wire keep_finish = nr & ~setlead;
   always @(posedge clk) begin
     moto_arm <= (moto_arm | armsig) & {4{keep_finish}};
-    lead_rgb <= (lead_rgb & {3{keep_finish}}) | (lead_rgb_next & {3{load_lead}});
+    moto_lead <= (moto_lead & {4{keep_finish}}) | leadsig;
   end
 
-  wire mR = sp1on | sp4on;
-  wire mG1 = sp2on | sp3on | sp4on;
-  wire mG0 = sp2on | sp4on;
-  wire mB = sp3on;
-  assign R = video_active ? {mR | (goal & lead_rgb[2]), mR|goal} : 2'b00;
-  assign G = video_active ? {mG1 | (goal & lead_rgb[1]), mG0|trkon|goal} : 2'b00;
-  assign B = video_active ? {mB | (goal & lead_rgb[0]), mB|goal} : 2'b00;
+  wire p1on = sp1on | (goal & moto_lead[0]);
+  wire p2on = sp2on | (goal & moto_lead[1]);
+  wire p3on = sp3on | (goal & moto_lead[2]);
+  wire p4on = sp4on | (goal & moto_lead[3]);
+  wire mR = p1on | p4on;
+  wire mG1 = p2on | p3on | p4on;
+  wire mG0 = p2on | p4on;
+  wire mB = p3on;
+  assign R = video_active ? {mR, mR|goal} : 2'b00;
+  assign G = video_active ? {mG1, mG0|trkon|goal} : 2'b00;
+  assign B = video_active ? {mB, mB|goal} : 2'b00;
   
   // Suppress unused signals warning
   //wire _unused_ok_ = &{moving_x, pix_y};
