@@ -17,10 +17,12 @@ Outpace your opponents and don't fall out of the track!
 
 ## How to test
 
-Connect to VGA. Use Input pins 0..3 to control motobikes and Input pin 4 to reset gameplay.
+Connect to VGA. Use Input pins 0..3 to control motobikes and Input pin 4 to reset gameplay. Use Bidirectional pins 1..0 to select the track and Bidirectional pins 3..2 to select the speed/turn preset.
 
 ## External hardware
 
 - VGA output PMOD
 - Gameplay reset signal on Input[4]
 - 4 input signals from player controls (active 1) on Input[3:0]
+- 2-bit track select on Bidirectional[1:0]
+- 2-bit speed/turn preset select on Bidirectional[3:2]
