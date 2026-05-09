@@ -20,7 +20,7 @@
   "CLOCK_PERIOD": 20,
 
   "//": "Hold slack margin - Increase them in case you are getting hold violations.",
-  "PL_RESIZER_HOLD_SLACK_MARGIN": 0.05,
+  "PL_RESIZER_HOLD_SLACK_MARGIN": 0.025,
   "GRT_RESIZER_HOLD_SLACK_MARGIN": 0.05,
 
   "//": "RUN_LINTER, LINTER_INCLUDE_PDK_MODELS - Disabling the linter is not recommended!",
@@ -54,7 +54,7 @@
   "FP_SIZING": "absolute",
 
   "GRT_ALLOW_CONGESTION": 1,
-  "GRT_ANTENNA_MARGIN": 0,
+  "GRT_ANTENNA_REPAIR_MARGIN": 0,
 
   "FP_IO_HLENGTH": 2,
   "FP_IO_VLENGTH": 2,
