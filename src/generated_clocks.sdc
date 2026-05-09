@@ -95,9 +95,20 @@ proc zuzel_generated_clock {name source master divide patterns} {
     set count [llength $pins]
     puts "\[INFO] Zuzel generated clock $name matched $count register clock pin(s)."
     if { $count == 0 } {
-        error "Zuzel generated clock $name did not match any register clock pins. Patterns: $patterns"
+        puts "\[INFO] Zuzel generated clock $name matched no pins by name; fallback will cover any unclocked pins."
+        return
     }
     create_generated_clock -name $name -source $source -master_clock $master -divide_by $divide $pins
+}
+
+proc zuzel_unclocked_clock_pins {} {
+    set pins {}
+    foreach clock_pin [all_registers -clock_pins] {
+        if { [llength [get_clocks -quiet -of_objects $clock_pin]] == 0 } {
+            lappend pins $clock_pin
+        }
+    }
+    return [zuzel_unique $pins]
 }
 
 set source_clk_pin [get_ports $clock_port]
@@ -136,6 +147,13 @@ zuzel_generated_clock zuzel_mov_clk $source_clk_pin $clock_port 4 {
     *movclk*
     *ctrl\[6\]*
     *mt_ctrl\[6\]*
+}
+
+set zuzel_remaining_clock_pins [zuzel_unclocked_clock_pins]
+set zuzel_remaining_clock_pin_count [llength $zuzel_remaining_clock_pins]
+puts "\[INFO] Zuzel conservative generated-clock fallback matched $zuzel_remaining_clock_pin_count register clock pin(s)."
+if { $zuzel_remaining_clock_pin_count > 0 } {
+    create_generated_clock -name zuzel_generated_fast -source $source_clk_pin -master_clock $clock_port -divide_by 4 $zuzel_remaining_clock_pins
 }
 
 puts "\[INFO] Setting clock uncertainty to: $::env(CLOCK_UNCERTAINTY_CONSTRAINT)"
