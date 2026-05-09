@@ -104,15 +104,14 @@ module tt_um_KK_VGA01(
 
   reg[3:0] moto_arm;
   reg[3:0] moto_lead;
-  wire armwin = pix_y[8] & pix_x[8] & pix_x[7];
+  wire armwin = &{pix_y[8], pix_x[8:7], ~pix_x[6]};
   wire[3:0] armsig = {4{armwin}} & {sp4on,sp3on,sp2on,sp1on};
   wire[3:0] leadsig = {4{goalmsk}} & moto_arm & {sp4on,sp3on,sp2on,sp1on};
   wire nr = ~mt_ctrl[0]; // ~reset
   wire setlead = |{leadsig};
-  wire lead_arm_mask = nr & ~setlead;
   always @(posedge clk) begin
-    moto_lead <= (moto_lead & {4{lead_arm_mask}}) | leadsig;
-    moto_arm <= (moto_arm | armsig) & {4{lead_arm_mask}};
+    moto_lead <= (moto_lead & {4{nr & ~setlead}}) | leadsig;
+    moto_arm <= (moto_arm | armsig) & {4{nr & ~setlead}};
   end
 
   wire p1on = sp1on | (goal & moto_lead[0]);
@@ -132,9 +131,9 @@ module tt_um_KK_VGA01(
   wire goalmsk = pix_y[8] & ~trkon & pix_x[8] & ~pix_x[7] & (pix_x[6] ^ pix_x[5]) & (pix_x[6] ^ pix_x[4]);
   wire goal = goalmsk & (pix_x[3] ^ pix_y[3]) & mt_ctrl[14];  // ... & deathmsk
   wire mGr = goal & ~|{moto_lead};
-  assign R = {2{video_active}} & {mR, mR|goal};
-  assign G = {2{video_active}} & {mG1, mG0|trkon|mGr};
-  assign B = {2{video_active}} & {mB, mB|goal};
+  assign R = video_active ? {mR, mR|goal} : 2'b00;
+  assign G = video_active ? {mG1, mG0|trkon|mGr} : 2'b00;
+  assign B = video_active ? {mB, mB|goal} : 2'b00;
   
   // Suppress unused signals warning
   wire _unused_ok_ = &{uio_in};
