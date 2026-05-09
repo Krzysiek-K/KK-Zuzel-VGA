@@ -104,7 +104,7 @@ module tt_um_KK_VGA01(
 
   reg[3:0] moto_arm;
   reg[3:0] moto_lead;
-  wire armwin = pix_y[8] & pix_x[8] & pix_x[7];
+  wire armwin = &{pix_y[8], pix_x[8:7], ~pix_x[6]};
   wire[3:0] armsig = {4{armwin}} & {sp4on,sp3on,sp2on,sp1on};
   wire[3:0] leadsig = {4{goalmsk}} & moto_arm & {sp4on,sp3on,sp2on,sp1on};
   wire nr = ~mt_ctrl[0]; // ~reset
