@@ -76,11 +76,12 @@ module motor_core(
   wire mov_clk = ctrl[6] & |{mov_gate & speed, r} & alive;
   wire spd_clk = ctrl[13];
   wire deathmask = ctrl[14];
+  wire sprite_on;
 
   // Alive
   reg alive;
   always @(posedge clk) begin
-    alive <= (alive & ~(spron & track_in)) | r;
+    alive <= (alive & ~(sprite_on & track_in)) | r;
   end
 
   // Speed handling
@@ -160,7 +161,8 @@ module motor_core(
   sprite_dly stmr_x( .start(spx==hpos), .sclk(clk), .spon(spon_x));
   sprite_dly stmr_y( .start(spy==vpos), .sclk(hsync), .spon(spon_y));
 
-  assign spron = (spon_x & spon_y) & (alive | deathmask);
+  assign sprite_on = spon_x & spon_y;
+  assign spron = sprite_on & (alive | deathmask);
 
   // Suppress unused signals warning
   wire _unused_ok_ = &{RESET_Y};

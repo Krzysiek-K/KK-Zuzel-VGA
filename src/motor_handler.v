@@ -47,16 +47,22 @@ module motor_handler(
   // 1000000001 0__ssssstt  s:movstep   t:movtick             (test)
   //
   reg turn_frame;
-  wire turn_15x = game_speed[1] & ~game_speed[0];
-  wire turn_2x = game_speed[1] & game_speed[0];
-  wire extra_turn_pass = turn_2x | (turn_15x & turn_frame);
+  wire gs0 = game_speed[0];
+  wire gs1 = game_speed[1];
+  wire turn_2x = gs1 & gs0;
+  wire extra_turn_pass = gs1 & (gs0 | turn_frame);
   wire dxyen = vpos[9] & ~|{vpos[8:1],hpos[9:6]} & (~vpos[0] | extra_turn_pass);
   wire[3:0] dxystep = hpos[5:2];
   //wire moven = vpos[9] & ~|{vpos[8:1]} & vpos[0] & ~|{hpos[9]};   //(test)
   wire moven = vpos[9] & ~|{vpos[8:3],hpos[9]} & vpos[2];
   wire[4:0] movstep = hpos[6:2];
   wire[3:0] movidx = {vpos[1:0],hpos[8:7]};
-  wire[3:0] movgate = {movidx[3], ~movidx[3] & movidx[2], ~|{movidx[3:2]} & movidx[1], ~|{movidx[3:1]} & movidx[0]};
+  wire no_movidx3 = ~movidx[3];
+  wire no_movidx32 = no_movidx3 & ~movidx[2];
+  wire no_movidx321 = no_movidx32 & ~movidx[1];
+  wire[3:0] movgate = {movidx[3], no_movidx3 & movidx[2], no_movidx32 & movidx[1], no_movidx321 & movidx[0]};
+  wire hpos_tick = hpos[1] & ~hpos[0];
+  wire movstep_lt27 = ~(movstep[4] & movstep[3] & (movstep[2] | (movstep[1] & movstep[0])));
   reg dxyclk;
   reg movclk;
   reg[1:0] spdcnt;
@@ -97,11 +103,11 @@ module motor_handler(
         5'b11110: movop = 3'bxxx;        
         5'b11111: movop = 3'bxxx;        
     endcase
-  end  
+  end
 
   always @(posedge clk) begin
-    dxyclk <= (dxyen | (moven & movop[0]) ) & (hpos[1:0]==2);
-    movclk <= moven & (movstep<27) & (hpos[1:0]==2);
+    dxyclk <= (dxyen | (moven & movop[0]) ) & hpos_tick;
+    movclk <= moven & movstep_lt27 & hpos_tick;
   end
   always @(posedge vsync) begin
     spdcnt <= {spdcnt[0], ~spdcnt[1]};
