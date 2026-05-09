@@ -120,8 +120,8 @@ module tt_um_KK_VGA01(
   wire p4on = sp4on | (goal & moto_lead[3]);
 
   wire mR = p1on | p4on;
-  wire mG1 = p2on | p3on | p4on;
   wire mG0 = p2on | p4on;
+  wire mG1 = mG0 | p3on;
   wire mB = p3on;
   // 1001xxxxx
   // 1010
