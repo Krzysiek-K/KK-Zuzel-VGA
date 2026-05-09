@@ -54,6 +54,7 @@
   "FP_SIZING": "absolute",
 
   "GRT_ALLOW_CONGESTION": 1,
+  "GRT_ANTENNA_MARGIN": 0,
 
   "FP_IO_HLENGTH": 2,
   "FP_IO_VLENGTH": 2,

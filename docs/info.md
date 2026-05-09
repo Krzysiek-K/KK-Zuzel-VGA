@@ -13,11 +13,18 @@ A motor track racing game for up to 4 players.
 Each player controls his/her bike using a single input pin: 0 - straight+accelerate, 1 - turn left+brake.
 Outpace your opponents and don't fall out of the track!
 
-![image](Screenshot.png)
+The game features 4 selectable tracks and 4 selectable motor speed settings.
+
+![image](Track1.png)
+![image](Track2.png)
+![image](Track3.png)
+![image](Track4.png)
 
 ## How to test
 
-Connect to VGA. Use Input pins 0..3 to control motobikes and Input pin 4 to reset gameplay. Use Bidirectional pins 1..0 to select the track and Bidirectional pins 3..2 to select the speed/turn preset.
+Connect to VGA using VGA PMOD on Output port.
+Use Input pins 0..3 to control motobikes and Input pin 4 to reset (restart) the game.
+Use Bidirectional pins 1..0 to select the track and Bidirectional pins 3..2 to select the speed/turn preset.
 
 ## External hardware
 
