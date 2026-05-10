@@ -90,6 +90,16 @@ proc zuzel_clock_pins_on_nets {patterns} {
     return [zuzel_unique $pins]
 }
 
+proc zuzel_without {items remove} {
+    set out {}
+    foreach item $items {
+        if { [lsearch -exact $remove $item] < 0 } {
+            lappend out $item
+        }
+    }
+    return $out
+}
+
 proc zuzel_generated_clock {name source master divide patterns} {
     set pins [zuzel_clock_pins_on_nets $patterns]
     set count [llength $pins]
@@ -102,13 +112,9 @@ proc zuzel_generated_clock {name source master divide patterns} {
 }
 
 proc zuzel_unclocked_clock_pins {} {
-    set pins {}
-    foreach clock_pin [all_registers -clock_pins] {
-        if { [llength [get_clocks -quiet -of_objects $clock_pin]] == 0 } {
-            lappend pins $clock_pin
-        }
-    }
-    return [zuzel_unique $pins]
+    set all_pins [all_registers -clock_pins]
+    set clocked_pins [all_registers -clock * -clock_pins]
+    return [zuzel_without $all_pins $clocked_pins]
 }
 
 set source_clk_pin [get_ports $clock_port]
