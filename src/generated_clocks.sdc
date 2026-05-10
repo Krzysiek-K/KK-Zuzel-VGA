@@ -80,10 +80,25 @@ proc zuzel_nets {patterns} {
 proc zuzel_clock_pins_on_nets {patterns} {
     set nets [zuzel_nets $patterns]
     set pins {}
+    set all_clock_pins [all_registers -clock_pins]
     foreach clock_pin [all_registers -clock_pins] {
         foreach net [get_nets -quiet -of_objects $clock_pin] {
             if { [lsearch -exact $nets $net] >= 0 } {
                 lappend pins $clock_pin
+            }
+        }
+    }
+    foreach net $nets {
+        if { [catch {set fanout_pins [all_fanout -flat -endpoints_only -from $net]} fanout_error] } {
+            set net_pins [get_pins -quiet -of_objects $net]
+            if { [llength $net_pins] == 0 || [catch {set fanout_pins [all_fanout -flat -endpoints_only -from $net_pins]} pin_fanout_error] } {
+                puts "\[WARNING] Unable to inspect fanout for generated-clock net $net: $fanout_error"
+                continue
+            }
+        }
+        foreach fanout_pin $fanout_pins {
+            if { [lsearch -exact $all_clock_pins $fanout_pin] >= 0 } {
+                lappend pins $fanout_pin
             }
         }
     }
@@ -165,6 +180,7 @@ zuzel_generated_clock zuzel_speed_clk $source_clk_pin $clock_port 420000 {
 zuzel_generated_clock zuzel_dxy_clk $source_clk_pin $clock_port 4 {
     *dxy_clk*
     *dxyclk*
+    *dxy_adc.aclk*
     *ctrl\[1\]*
     *mt_ctrl\[1\]*
 }
