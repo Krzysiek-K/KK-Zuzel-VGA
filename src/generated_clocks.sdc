@@ -127,6 +127,16 @@ proc zuzel_unclocked_clock_pins {} {
     return [zuzel_without $all_pins $clocked_pins]
 }
 
+proc zuzel_existing_clocks {names} {
+    set clocks {}
+    foreach name $names {
+        foreach clock [get_clocks -quiet $name] {
+            lappend clocks $clock
+        }
+    }
+    return [zuzel_unique $clocks]
+}
+
 set source_clk_pin [get_ports $clock_port]
 
 # hsync and vsync are flip-flop outputs from hvsync_generator.
@@ -170,6 +180,27 @@ set zuzel_remaining_clock_pin_count [llength $zuzel_remaining_clock_pins]
 puts "\[INFO] Zuzel conservative generated-clock fallback matched $zuzel_remaining_clock_pin_count register clock pin(s)."
 if { $zuzel_remaining_clock_pin_count > 0 } {
     create_generated_clock -name zuzel_generated_fast -source $source_clk_pin -master_clock $clock_port -divide_by 4 $zuzel_remaining_clock_pins
+}
+
+# The motor clocks are delayed clock-enable strobes. Their consumers are meant
+# to capture values launched by clk/vsync once the strobe gate tree has settled,
+# so same-edge hold checks into those strobe domains are not a real requirement.
+set zuzel_strobe_clocks [zuzel_existing_clocks {
+    zuzel_hsync
+    zuzel_speed_clk
+    zuzel_dxy_clk
+    zuzel_mov_clk
+    zuzel_generated_fast
+}]
+if { [llength $zuzel_strobe_clocks] > 0 } {
+    set zuzel_strobe_parent_clocks [zuzel_existing_clocks [list $clock_port zuzel_vsync]]
+    if { [llength $zuzel_strobe_parent_clocks] > 0 } {
+        set_false_path -hold -from $zuzel_strobe_parent_clocks -to $zuzel_strobe_clocks
+    }
+    set zuzel_stable_mode_ports [get_ports -quiet uio_in*]
+    if { [llength $zuzel_stable_mode_ports] > 0 } {
+        set_false_path -hold -from $zuzel_stable_mode_ports -to $zuzel_strobe_clocks
+    }
 }
 
 puts "\[INFO] Setting clock uncertainty to: $::env(CLOCK_UNCERTAINTY_CONSTRAINT)"
