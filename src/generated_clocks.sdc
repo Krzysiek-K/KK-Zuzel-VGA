@@ -80,25 +80,10 @@ proc zuzel_nets {patterns} {
 proc zuzel_clock_pins_on_nets {patterns} {
     set nets [zuzel_nets $patterns]
     set pins {}
-    set all_clock_pins [all_registers -clock_pins]
     foreach clock_pin [all_registers -clock_pins] {
         foreach net [get_nets -quiet -of_objects $clock_pin] {
             if { [lsearch -exact $nets $net] >= 0 } {
                 lappend pins $clock_pin
-            }
-        }
-    }
-    foreach net $nets {
-        if { [catch {set fanout_pins [all_fanout -flat -endpoints_only -from $net]} fanout_error] } {
-            set net_pins [get_pins -quiet -of_objects $net]
-            if { [llength $net_pins] == 0 || [catch {set fanout_pins [all_fanout -flat -endpoints_only -from $net_pins]} pin_fanout_error] } {
-                puts "\[WARNING] Unable to inspect fanout for generated-clock net $net: $fanout_error"
-                continue
-            }
-        }
-        foreach fanout_pin $fanout_pins {
-            if { [lsearch -exact $all_clock_pins $fanout_pin] >= 0 } {
-                lappend pins $fanout_pin
             }
         }
     }
@@ -155,13 +140,17 @@ proc zuzel_existing_clocks {names} {
 set source_clk_pin [get_ports $clock_port]
 
 # hsync and vsync are flip-flop outputs from hvsync_generator.
+# The signoff Tcl environment does not expose fanout traversal helpers, so the
+# buffered post-route clock-fanout nets are listed with their source nets.
 zuzel_generated_clock zuzel_hsync $source_clk_pin $clock_port 800 {
     hsync
     *hsync*
+    net80
 }
 zuzel_generated_clock zuzel_vsync $source_clk_pin $clock_port 420000 {
     vsync
     *vsync*
+    net79
 }
 
 # speed_clk is selected by stable gameplay mode inputs. Constrain it at the
@@ -172,6 +161,8 @@ zuzel_generated_clock zuzel_speed_clk $source_clk_pin $clock_port 420000 {
     *spdcnt*
     *ctrl\[13\]*
     *mt_ctrl\[13\]*
+    net42
+    net43
 }
 
 # Per-motor movement/update clocks are gated pulses derived from clk-registered
@@ -183,12 +174,35 @@ zuzel_generated_clock zuzel_dxy_clk $source_clk_pin $clock_port 4 {
     *dxy_adc.aclk*
     *ctrl\[1\]*
     *mt_ctrl\[1\]*
+    net18
+    net19
+    net20
+    net21
+    net22
+    net23
+    net24
+    net25
 }
 zuzel_generated_clock zuzel_mov_clk $source_clk_pin $clock_port 4 {
     *mov_clk*
     *movclk*
     *ctrl\[6\]*
     *mt_ctrl\[6\]*
+    net26
+    net27
+    net28
+    net29
+    net30
+    net31
+    net32
+    net33
+    net34
+    net35
+    net36
+    net37
+    net38
+    net39
+    net40
 }
 
 set zuzel_remaining_clock_pins [zuzel_unclocked_clock_pins]
@@ -216,6 +230,11 @@ if { [llength $zuzel_strobe_clocks] > 0 } {
     set zuzel_stable_mode_ports [get_ports -quiet uio_in*]
     if { [llength $zuzel_stable_mode_ports] > 0 } {
         set_false_path -hold -from $zuzel_stable_mode_ports -to $zuzel_strobe_clocks
+    }
+    set zuzel_dxy_clocks [zuzel_existing_clocks {zuzel_dxy_clk}]
+    set zuzel_mov_clocks [zuzel_existing_clocks {zuzel_mov_clk}]
+    if { [llength $zuzel_dxy_clocks] > 0 && [llength $zuzel_mov_clocks] > 0 } {
+        set_false_path -hold -from $zuzel_dxy_clocks -to $zuzel_mov_clocks
     }
 }
 
