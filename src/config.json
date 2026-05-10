@@ -18,7 +18,6 @@
   "//": "CLOCK_PERIOD - Increase this in case you are getting setup time violations.",
   "//": "The value is in nanoseconds, so 20ns == 50MHz.",
   "CLOCK_PERIOD": 20,
-  "PNR_SDC_FILE": "ref::$DESIGN_DIR/generated_clocks.sdc",
   "SIGNOFF_SDC_FILE": "ref::$DESIGN_DIR/generated_clocks.sdc",
 
   "//": "Hold slack margin - Increase them in case you are getting hold violations.",

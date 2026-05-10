@@ -111,9 +111,19 @@ proc zuzel_generated_clock {name source master divide patterns} {
     create_generated_clock -name $name -source $source -master_clock $master -divide_by $divide $pins
 }
 
+proc zuzel_clocked_clock_pins {} {
+    set pins {}
+    foreach clock [all_clocks] {
+        foreach clock_pin [all_registers -clock $clock -clock_pins] {
+            lappend pins $clock_pin
+        }
+    }
+    return [zuzel_unique $pins]
+}
+
 proc zuzel_unclocked_clock_pins {} {
     set all_pins [all_registers -clock_pins]
-    set clocked_pins [all_registers -clock * -clock_pins]
+    set clocked_pins [zuzel_clocked_clock_pins]
     return [zuzel_without $all_pins $clocked_pins]
 }
 
