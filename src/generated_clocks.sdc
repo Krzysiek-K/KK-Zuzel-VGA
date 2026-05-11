@@ -112,7 +112,11 @@ proc zuzel_existing_clocks {names} {
     return [zuzel_unique $clocks]
 }
 
+set zuzel_generated_clock_sources {}
+
 proc zuzel_generated_clock {name source master divide patterns} {
+    global zuzel_generated_clock_sources
+
     set targets [zuzel_nets $patterns]
     set target_count [llength $targets]
     puts "\[INFO] Zuzel generated clock $name matched $target_count source net(s)."
@@ -128,6 +132,10 @@ proc zuzel_generated_clock {name source master divide patterns} {
         -master_clock $master \
         -divide_by $divide \
         $targets
+
+    foreach target $targets {
+        lappend zuzel_generated_clock_sources $target
+    }
 
     set clock [get_clocks -quiet $name]
     set clock_pins [all_registers -clock $clock -clock_pins]
@@ -185,6 +193,12 @@ zuzel_generated_clock zuzel_motor3_mov_clk $source_clk_pin $clock_port 4 {
 }
 zuzel_generated_clock zuzel_motor4_mov_clk $source_clk_pin $clock_port 4 {
     *motor4.mov_clk*
+}
+
+set zuzel_generated_clock_sources [zuzel_unique $zuzel_generated_clock_sources]
+if { [llength [info commands set_cts_config]] > 0 } {
+    puts "\[INFO] Zuzel CTS skip generated clock source nets: $zuzel_generated_clock_sources"
+    set_cts_config -skip_nets $zuzel_generated_clock_sources
 }
 
 set zuzel_remaining_clock_pins [zuzel_unclocked_clock_pins]
