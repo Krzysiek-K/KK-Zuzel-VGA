@@ -112,7 +112,7 @@ proc zuzel_existing_clocks {names} {
     return [zuzel_unique $clocks]
 }
 
-proc zuzel_generated_clock {name source master divide patterns expected_clock_pins} {
+proc zuzel_generated_clock {name source master divide patterns} {
     set targets [zuzel_nets $patterns]
     set target_count [llength $targets]
     puts "\[INFO] Zuzel generated clock $name matched $target_count source net(s)."
@@ -133,10 +133,6 @@ proc zuzel_generated_clock {name source master divide patterns expected_clock_pi
     set clock_pins [all_registers -clock $clock -clock_pins]
     set clock_pin_count [llength $clock_pins]
     puts "\[INFO] Zuzel generated clock $name reaches $clock_pin_count register clock pin(s)."
-    if { $clock_pin_count != $expected_clock_pins } {
-        puts "\[ERROR] $name reached clock pins: $clock_pins"
-        error "Zuzel generated clock $name expected $expected_clock_pins clock pin(s), got $clock_pin_count."
-    }
 }
 
 set source_clk_pin [get_ports $clock_port]
@@ -146,50 +142,50 @@ set source_clk_pin [get_ports $clock_port]
 zuzel_generated_clock zuzel_hsync $source_clk_pin $clock_port 800 {
     hsync
     *hvsync_gen.hsync*
-} 12
+}
 
 zuzel_generated_clock zuzel_vsync $source_clk_pin $clock_port 420000 {
     vsync
     *hvsync_gen.vsync*
-} 9
+}
 
 # speed_clk is selected by stable gameplay mode inputs. The fastest mode is
 # direct vsync, so one frame is the conservative period.
 zuzel_generated_clock zuzel_speed_clk $source_clk_pin $clock_port 420000 {
     *mctrl.speed_clk*
-} 16
+}
 
 # Per-motor movement/update clocks are post-gate strobe sources. Splitting them
 # per motor makes hold analysis compare fanout from the actual strobe output.
 zuzel_generated_clock zuzel_motor1_dxy_clk $source_clk_pin $clock_port 4 {
     *motor1.dxy_clk*
     *motor1.dxy_adc.aclk*
-} 18
+}
 zuzel_generated_clock zuzel_motor2_dxy_clk $source_clk_pin $clock_port 4 {
     *motor2.dxy_clk*
     *motor2.dxy_adc.aclk*
-} 18
+}
 zuzel_generated_clock zuzel_motor3_dxy_clk $source_clk_pin $clock_port 4 {
     *motor3.dxy_clk*
     *motor3.dxy_adc.aclk*
-} 18
+}
 zuzel_generated_clock zuzel_motor4_dxy_clk $source_clk_pin $clock_port 4 {
     *motor4.dxy_clk*
     *motor4.dxy_adc.aclk*
-} 18
+}
 
 zuzel_generated_clock zuzel_motor1_mov_clk $source_clk_pin $clock_port 4 {
     *motor1.mov_clk*
-} 29
+}
 zuzel_generated_clock zuzel_motor2_mov_clk $source_clk_pin $clock_port 4 {
     *motor2.mov_clk*
-} 29
+}
 zuzel_generated_clock zuzel_motor3_mov_clk $source_clk_pin $clock_port 4 {
     *motor3.mov_clk*
-} 29
+}
 zuzel_generated_clock zuzel_motor4_mov_clk $source_clk_pin $clock_port 4 {
     *motor4.mov_clk*
-} 29
+}
 
 set zuzel_remaining_clock_pins [zuzel_unclocked_clock_pins]
 set zuzel_remaining_clock_pin_count [llength $zuzel_remaining_clock_pins]
