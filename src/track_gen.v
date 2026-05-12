@@ -8,8 +8,8 @@ module track_gen(
   output wire       trkout
 );
 
-  reg[6:0] xreg;
-  reg[6:0] yreg;
+  reg[5:0] xreg;
+  reg[5:0] yreg;
   reg trkcmpy;
   reg trkcapt;
 
@@ -40,10 +40,10 @@ module track_gen(
   wire imm2n0 = imm_sel[2] & ~imm_sel[0];
 
   // Input values selection + ALU
-  wire[6:0] a_in = acsel ? hpos[9:3] : yreg;
-  wire[6:0] c_in = acsel ? vpos[9:3] : xreg;
+  wire[6:0] a_in = acsel ? hpos[9:3] : {1'b0, yreg};
+  wire[5:0] c_in = acsel ? vpos[8:3] : xreg;
   wire[6:0] b_imm_in = {1'b0, imm2n0, imm_sel[1] | imm20, ~imm_sel[1], imm_sel[0], ~imm2n0, imm_sel[1]};
-  wire[6:0] b_x_in = xsrc ? {1'b1, ~xreg[6:1]} : xreg;
+  wire[6:0] b_x_in = xsrc ? {2'b11, ~xreg[5:1]} : {1'b0, xreg};
   wire[6:0] b_in = bsel ? b_imm_in : b_x_in;
   wire[6:0] sub_result = a_in - b_in;
   wire sign = sub_result[6];
@@ -52,20 +52,20 @@ module track_gen(
   // X output
   wire xxor = sign & mode[0];                 // ABS:sign  /  MSK:0  /  SRT:any
   wire xmask = (mode[0] | nsign) & ~mode[1];  // ABS:1  /  MSK:nsign  /  SRT:0
-  wire[6:0] sub_abs = sub_result[6:0] ^ {xxor,xxor,xxor,xxor,xxor,xxor,xxor};
-  wire[6:0] sub_mask = sub_abs[6:0] & {xmask,xmask,xmask,xmask,xmask,xmask,xmask};
-  wire[6:0] x_sort = sign ? a_in : b_in;
-  wire[6:0] x_out = sub_mask | (x_sort & {mode[1],mode[1],mode[1],mode[1],mode[1],mode[1],mode[1]});
+  wire[5:0] sub_abs = sub_result[5:0] ^ {xxor,xxor,xxor,xxor,xxor,xxor};
+  wire[5:0] sub_mask = sub_abs & {xmask,xmask,xmask,xmask,xmask,xmask};
+  wire[5:0] x_sort = sign ? a_in[5:0] : b_in[5:0];
+  wire[5:0] x_out = sub_mask | (x_sort & {mode[1],mode[1],mode[1],mode[1],mode[1],mode[1]});
 
   // Y output
   wire ysel = sign | ~mode[1];
-  wire[6:0] y_out = ysel ? c_in : a_in;
+  wire[5:0] y_out = ysel ? c_in : a_in[5:0];
   wire y_eq_7_or_6 = y_out[4] & y_out[3] & (y_out[2] ^ gt0);
-  wire y_ge_16_or_20 = y_out[6] | y_out[5] | (y_out[4] & (gt0 | y_out[3] | y_out[2]));
+  wire y_ge_16_or_20 = y_out[5] | (y_out[4] & (gt0 | y_out[3] | y_out[2]));
   wire trkcmpy_next = gt1 ? y_ge_16_or_20 : y_eq_7_or_6;
 
   wire cmp_x_edge = x_out[4:3] == 2'b00;
-  wire cmp_x_outer24 = (gt1 | gt0) & (x_out[6] | x_out[5] | (x_out[4] & x_out[3]));
+  wire cmp_x_outer24 = (gt1 | gt0) & (x_out[5] | (x_out[4] & x_out[3]));
   wire cmp_x_outer11 = gt1 & gt0 & x_out[4] & x_out[2];
 
   always @(posedge clk) begin
@@ -80,6 +80,6 @@ module track_gen(
   assign trkout = trkcapt;
 
   //// Suppress unused signals warning
-  wire _unused_ok_ = &{vpos[2:0]};
+  wire _unused_ok_ = &{vpos[9], vpos[2:0]};
 
 endmodule
