@@ -16,14 +16,14 @@
   "PL_TARGET_DENSITY_PCT": 60,
 
   "//": "CLOCK_PERIOD - Increase this in case you are getting setup time violations.",
-  "//": "The value is in nanoseconds, so 20ns == 50MHz.",
-  "CLOCK_PERIOD": 20,
+  "//": "The value is in nanoseconds, so 40ns == 25MHz.",
+  "CLOCK_PERIOD": 40,
   "PNR_SDC_FILE": "ref::$DESIGN_DIR/generated_clocks.sdc",
   "SIGNOFF_SDC_FILE": "ref::$DESIGN_DIR/generated_clocks.sdc",
 
   "//": "Hold slack margin - Increase them in case you are getting hold violations.",
-  "PL_RESIZER_HOLD_SLACK_MARGIN": 0.04,
-  "GRT_RESIZER_HOLD_SLACK_MARGIN": 0.04,
+  "PL_RESIZER_HOLD_SLACK_MARGIN": 0.055,
+  "GRT_RESIZER_HOLD_SLACK_MARGIN": 0.055,
 
   "//": "RUN_LINTER, LINTER_INCLUDE_PDK_MODELS - Disabling the linter is not recommended!",
   "RUN_LINTER": 1,
@@ -64,7 +64,6 @@
 
   "//": "Clock",
   "RUN_CTS": 1,
-  "CTS_ROOT_BUFFER": "sky130_fd_sc_hd__clkbuf_8",
 
   "//": "Don't generate power rings",
   "FP_PDN_MULTILAYER": 0,
