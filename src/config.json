@@ -22,8 +22,8 @@
   "SIGNOFF_SDC_FILE": "ref::$DESIGN_DIR/generated_clocks.sdc",
 
   "//": "Hold slack margin - Increase them in case you are getting hold violations.",
-  "PL_RESIZER_HOLD_SLACK_MARGIN": 0.055,
-  "GRT_RESIZER_HOLD_SLACK_MARGIN": 0.055,
+  "PL_RESIZER_HOLD_SLACK_MARGIN": 0.04,
+  "GRT_RESIZER_HOLD_SLACK_MARGIN": 0.04,
 
   "//": "RUN_LINTER, LINTER_INCLUDE_PDK_MODELS - Disabling the linter is not recommended!",
   "RUN_LINTER": 1,
