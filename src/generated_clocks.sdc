@@ -183,16 +183,16 @@ zuzel_generated_clock zuzel_motor4_dxy_clk $source_clk_pin $clock_port 4 {
 }
 
 zuzel_generated_clock zuzel_motor1_mov_clk $source_clk_pin $clock_port 4 {
-    *motor1.mov_clk*
+    motor1.mov_clk
 }
 zuzel_generated_clock zuzel_motor2_mov_clk $source_clk_pin $clock_port 4 {
-    *motor2.mov_clk*
+    motor2.mov_clk
 }
 zuzel_generated_clock zuzel_motor3_mov_clk $source_clk_pin $clock_port 4 {
-    *motor3.mov_clk*
+    motor3.mov_clk
 }
 zuzel_generated_clock zuzel_motor4_mov_clk $source_clk_pin $clock_port 4 {
-    *motor4.mov_clk*
+    motor4.mov_clk
 }
 
 set zuzel_generated_clock_sources [zuzel_unique $zuzel_generated_clock_sources]
