@@ -197,6 +197,25 @@ zuzel_generated_clock zuzel_motor4_mov_clk $source_clk_pin $clock_port 4 {
 
 set zuzel_generated_clock_sources [zuzel_unique $zuzel_generated_clock_sources]
 puts "\[INFO] Zuzel generated clock source nets: $zuzel_generated_clock_sources"
+set zuzel_cts_skip_sources [zuzel_nets {
+    hsync
+    *hvsync_gen.hsync*
+    vsync
+    *hvsync_gen.vsync*
+    *mctrl.speed_clk*
+    *motor1.dxy_clk*
+    *motor1.dxy_adc.aclk*
+    *motor2.dxy_clk*
+    *motor2.dxy_adc.aclk*
+    *motor3.dxy_clk*
+    *motor3.dxy_adc.aclk*
+    *motor4.dxy_clk*
+    *motor4.dxy_adc.aclk*
+}]
+if { [llength [info commands set_cts_config]] > 0 } {
+    puts "\[INFO] Zuzel CTS skip generated clock source nets: $zuzel_cts_skip_sources"
+    set_cts_config -skip_nets $zuzel_cts_skip_sources
+}
 
 set zuzel_remaining_clock_pins [zuzel_unclocked_clock_pins]
 set zuzel_remaining_clock_pin_count [llength $zuzel_remaining_clock_pins]
