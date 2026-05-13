@@ -64,6 +64,7 @@
 
   "//": "Clock",
   "RUN_CTS": 1,
+  "CTS_ROOT_BUFFER": "sky130_fd_sc_hd__clkbuf_8",
 
   "//": "Don't generate power rings",
   "FP_PDN_MULTILAYER": 0,
