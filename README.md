@@ -1,42 +1,55 @@
 ![](../../workflows/gds/badge.svg) ![](../../workflows/docs/badge.svg) ![](../../workflows/test/badge.svg) ![](../../workflows/fpga/badge.svg)
 
-# Tiny Tapeout Verilog Project Template
+# Zuzel game hardened in silicon by Krzysztof Kluczek (KK/Altair)
 
-- [Read the documentation for project](docs/info.md)
+Custom CPU architecture was designed to fit the complete project on a small area of silicon (160 um x 100 um).
+Featuring:
+- 7-bit track generator CPU (with 3 custom instructions)
+- Common player control block (generating 15 control signals)
+- 4x player simulation block (each featuring 4 registers, 2x streaming 1-bit ALUs and a 7x7 sprite generator)
+- VGA timing generator
+- Top level logic (tying everything together, generating final video signal and performing collision detection)
 
-## What is Tiny Tapeout?
+Playable online version & (upcoming) writeup: [http://devkk.net/index.php?tag=games&id=39](http://devkk.net/index.php?tag=games&id=39)
+Original repository: [https://github.com/Krzysiek-K/KK-Zuzel-VGA](https://github.com/Krzysiek-K/KK-Zuzel-VGA)
 
-Tiny Tapeout is an educational project that aims to make it easier and cheaper than ever to get your digital and analog designs manufactured on a real chip.
+![image](docs/Screenshot.png)
 
-To learn more and get started, visit https://tinytapeout.com.
 
-## Set up your Verilog project
+## Inspired by Piotr Kamiński game created in 1994
+Watch gameplay of original game here: [https://www.youtube.com/watch?v=TAxoQyd6Lxc](https://www.youtube.com/watch?v=TAxoQyd6Lxc)
 
-1. Add your Verilog files to the `src` folder.
-2. Edit the [info.yaml](info.yaml) and update information about your project, paying special attention to the `source_files` and `top_module` properties. If you are upgrading an existing Tiny Tapeout project, check out our [online info.yaml migration tool](https://tinytapeout.github.io/tt-yaml-upgrade-tool/).
-3. Edit [docs/info.md](docs/info.md) and add a description of your project.
-4. Adapt the testbench to your design. See [test/README.md](test/README.md) for more information.
+## How it works
 
-The GitHub action will automatically build the ASIC files using [LibreLane](https://www.zerotoasiccourse.com/terminology/librelane/).
+A motor track racing game for up to 4 players.
+Each player controls his/her bike using a single input pin:
+- 0 - straight+accelerate
+- 1 - turn left+brake
 
-## Enable GitHub actions to build the results page
+Bidirectional input pins select game mode:
+- [1:0] - Track selection
+- [3:2] - Game speed
 
-- [Enabling GitHub Pages](https://tinytapeout.com/faq/#my-github-action-is-failing-on-the-pages-part)
+Outpace your opponents and don't fall out of the track!
 
-## Resources
 
-- [FAQ](https://tinytapeout.com/faq/)
-- [Digital design lessons](https://tinytapeout.com/digital_design/)
-- [Learn how semiconductors work](https://tinytapeout.com/siliwiz/)
-- [Join the community](https://tinytapeout.com/discord)
-- [Build your design locally](https://www.tinytapeout.com/guides/local-hardening/)
 
-## What next?
+## How to test
 
-- [Submit your design to the next shuttle](https://app.tinytapeout.com/).
-- Edit [this README](README.md) and explain your design, how it works, and how to test it.
-- Share your project on your social network of choice:
-  - LinkedIn [#tinytapeout](https://www.linkedin.com/search/results/content/?keywords=%23tinytapeout) [@TinyTapeout](https://www.linkedin.com/company/100708654/)
-  - Mastodon [#tinytapeout](https://chaos.social/tags/tinytapeout) [@matthewvenn](https://chaos.social/@matthewvenn)
-  - X (formerly Twitter) [#tinytapeout](https://twitter.com/hashtag/tinytapeout) [@tinytapeout](https://twitter.com/tinytapeout)
-  - Bluesky [@tinytapeout.com](https://bsky.app/profile/tinytapeout.com)
+- Connect to VGA.
+- Use Bidirectional pins [1:0] to select one of the 4 available tracks.
+- Use Bidirectional pins [3:2] to select game speed.
+- Use Input pin 4 to reset gameplay.
+- Use Input pins [3:0] to control motobikes.
+
+## External hardware
+
+- VGA output PMOD
+- Gameplay reset signal on Input[4] (active 1)
+- 4 input signals from player controls on Input[3:0] (active 1)
+- Gameplay mode switches on Bidirectional port [3:0] (active 1)
+
+
+## Silicon preview
+
+![gds render](docs/gds_render.png)
